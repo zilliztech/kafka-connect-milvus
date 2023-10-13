@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: ch.qos.logback:logback-classic:1.4.11" type="java-imported" external-system-id="Maven">
+    <properties groupId="ch.qos.logback" artifactId="logback-classic" version="1.4.11" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

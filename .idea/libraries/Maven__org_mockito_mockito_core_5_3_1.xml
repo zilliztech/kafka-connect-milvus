@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.mockito:mockito-core:5.3.1" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.mockito" artifactId="mockito-core" version="5.3.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.3.1/mockito-core-5.3.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.3.1/mockito-core-5.3.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.3.1/mockito-core-5.3.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
