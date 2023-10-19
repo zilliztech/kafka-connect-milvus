@@ -45,7 +45,7 @@ public class MilvusSinkTask extends SinkTask {
         this.myMilvusClient = new MilvusServiceClient(
                 ConnectParam.newBuilder()
                         .withUri(config.getUrl())
-                        .withAuthorization(config.getUsername(), config.getPassword())
+                        .withToken(config.getToken())
                         .build());
         this.collectionSchema = GetCollectionInfo(config.getCollectionName());
 
