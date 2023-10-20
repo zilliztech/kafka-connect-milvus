@@ -1,0 +1,6 @@
+{
+  "public.endpoint": "https://<public.endpoint>:port",
+  "token": "*****************************************",
+  "collection.name": "topic_0",
+  "topics": "topic_0"
+}

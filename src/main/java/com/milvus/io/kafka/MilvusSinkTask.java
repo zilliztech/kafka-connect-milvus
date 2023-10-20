@@ -45,7 +45,7 @@ public class MilvusSinkTask extends SinkTask {
         this.myMilvusClient = new MilvusServiceClient(
                 ConnectParam.newBuilder()
                         .withUri(config.getUrl())
-                        .withAuthorization(config.getUsername(), config.getPassword())
+                        .withToken(config.getToken())
                         .build());
         this.collectionSchema = GetCollectionInfo(config.getCollectionName());
 
@@ -84,22 +84,15 @@ public class MilvusSinkTask extends SinkTask {
     }
 
     private void WriteRecord(SinkRecord record, CollectionSchema collectionSchema) {
-        InsertParam insertParam;
-        if(collectionSchema.getEnableDynamicField()){
-            List<JSONObject> fields = converter.convertRecordWithDynamicSchema(record, collectionSchema);
-            insertParam = InsertParam.newBuilder()
-                    .withCollectionName(config.getCollectionName())
-                    .withRows(fields)
-                    .build();
-        }else {
-            List<InsertParam.Field> fields = converter.convertRecord(record, collectionSchema);
-            insertParam = InsertParam.newBuilder()
+        // not support dynamic schema for now, for dynamic schema, we need to put the data into a JSONObject
+        List<InsertParam.Field> fields = converter.convertRecord(record, collectionSchema);
+        InsertParam insertParam = InsertParam.newBuilder()
                     .withCollectionName(config.getCollectionName())
                     .withFields(fields)
                     .build();
-        }
-        log.debug("Inserting data to collection: " + config.getCollectionName() + " with fields: " +
-                insertParam.getFields() + "with rows: "+ insertParam.getRows());
+
+        log.info("Inserting data to collection: " + config.getCollectionName() + " with fields: " +
+                insertParam.getFields());
         myMilvusClient.insert(insertParam);
     }
 
