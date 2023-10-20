@@ -86,11 +86,27 @@
                         </goals>
                         <configuration>
                             <title>kafka-connector-milvus</title>
+                            <documentationUrl>https://github.com/zilliztech/kafka-connect-milvus/tree/main</documentationUrl>
                             <description>kafka-connector-milvus</description>
                             <ownerUsername>zilliz</ownerUsername>
+                            <ownerType>organization</ownerType>
+                            <ownerName>Zilliz, Inc.</ownerName>
+                            <ownerUrl>https://zilliz.com/</ownerUrl>
+<!--                            <ownerLogo></ownerLogo>-->
+
                             <componentTypes>
                                 <componentType>sink</componentType>
                             </componentTypes>
+
+                            <tags>
+                                <tag>Milvus</tag>
+                                <tag>Zilliz Cloud</tag>
+                                <tag>vector database</tag>
+                                <tag>similarity search</tag>
+                            </tags>
+
+                            <confluentControlCenterIntegration>true</confluentControlCenterIntegration>
+
                         </configuration>
                     </execution>
                 </executions>
