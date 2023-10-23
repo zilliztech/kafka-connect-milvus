@@ -5,22 +5,27 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.sink.SinkConnector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class MilvusSinkConnector extends SinkConnector{
+
+    private static final Logger log = LoggerFactory.getLogger(MilvusSinkConnector.class);
     private Map<String, String> configProperties;
 
     @Override
     public void start(Map<String, String> props) {
         try {
+            log.info("starting Milvus Sink Connector");
             configProperties = props;
             // validation
             new MilvusSinkConnectorConfig(props);
         }catch (ConfigException e){
-            throw new ConfigException("Couldn't start ZillizCloudSinkConnector due to configuration error", e);
+            throw new ConfigException("Couldn't start MilvusSinkConnector due to configuration error", e);
         }
     }
 
