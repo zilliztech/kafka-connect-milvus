@@ -65,3 +65,9 @@ Start the connector to begin streaming data from Kafka to Milvus.
 
 <img src="src/main/resources/images/insearted_entities.png" width="80%" />
  
+
+### Support
+
+If you require any assistance or have questions regarding the Kafka Connect Milvus Connector, you can reach out to our support team. We are here to help you with any issues or inquiries you may have.
+
+- **Email:** [support@zilliz.com](mailto:support@zilliz.com)
