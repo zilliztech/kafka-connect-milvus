@@ -1,7 +1,7 @@
 package com.milvus.io.kafka;
 
-import com.alibaba.fastjson.JSONObject;
 import com.milvus.io.kafka.utils.DataConverter;
+import com.milvus.io.kafka.utils.Utils;
 import com.milvus.io.kafka.utils.VersionUtil;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.CollectionSchema;
@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.milvus.io.kafka.MilvusSinkConnectorConfig.TOKEN;
+
 public class MilvusSinkTask extends SinkTask {
 
     private static final Logger log = LoggerFactory.getLogger(MilvusSinkTask.class);
@@ -38,6 +40,7 @@ public class MilvusSinkTask extends SinkTask {
     @Override
     public void start(Map<String, String> props) {
         log.info("Starting MilvusSinkTask.");
+        props.put(TOKEN, Utils.encryptToken(props.get(TOKEN)));
         this.config = new MilvusSinkConnectorConfig(props);
         this.converter = new DataConverter(config);
 
@@ -45,11 +48,11 @@ public class MilvusSinkTask extends SinkTask {
         this.myMilvusClient = new MilvusServiceClient(
                 ConnectParam.newBuilder()
                         .withUri(config.getUrl())
-                        .withToken(config.getToken())
+                        .withToken(Utils.decryptToken(config.getToken()))
                         .build());
         this.collectionSchema = GetCollectionInfo(config.getCollectionName());
 
-        log.info("Started ZillizCloudSinkTask, Connecting to Zilliz Cluster:" + config.getUrl());
+        log.info("Started MilvusSinkTask, Connecting to Zilliz Cluster:" + config.getUrl());
 
     }
 
