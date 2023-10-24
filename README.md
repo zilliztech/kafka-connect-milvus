@@ -77,3 +77,10 @@ Start the connector to begin streaming data from Kafka to Milvus.
 ### Support
 
 If you require any assistance or have questions regarding the Kafka Connect Milvus Connector, please feel free to reach out to our support team: **Email:** [support@zilliz.com](mailto:support@zilliz.com)
+
+### Disclaimer
+
+Regarding Kafka hosting, currently this connector only supports Confluent Cloud. If used for the other forms of Kafka hosting, including but not limited to Confluent Platform and self-hosted Kafka instances, the security and usability of this connector has not been fully verified. Please use at your discretion or contact us if you intend to use it in such settings.
+
+Regarding Milvus, both the self-hosted Milvus and Zilliz Cloud are supported.
+
