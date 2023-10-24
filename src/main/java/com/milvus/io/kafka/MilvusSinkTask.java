@@ -48,7 +48,7 @@ public class MilvusSinkTask extends SinkTask {
         this.myMilvusClient = new MilvusServiceClient(
                 ConnectParam.newBuilder()
                         .withUri(config.getUrl())
-                        .withToken(Utils.decryptToken(config.getToken()))
+                        .withToken(Utils.decryptToken(config.getToken().value()))
                         .build());
         this.collectionSchema = GetCollectionInfo(config.getCollectionName());
 
@@ -66,7 +66,7 @@ public class MilvusSinkTask extends SinkTask {
         }
     }
 
-    private CollectionSchema GetCollectionInfo(String collectionName) {
+    protected CollectionSchema GetCollectionInfo(String collectionName) {
         // check if the collection exists
         R<DescribeCollectionResponse> response = myMilvusClient.describeCollection(DescribeCollectionParam.newBuilder()
                 .withCollectionName(collectionName).build());
@@ -86,7 +86,7 @@ public class MilvusSinkTask extends SinkTask {
         return response.getData().getSchema();
     }
 
-    private void WriteRecord(SinkRecord record, CollectionSchema collectionSchema) {
+    protected void WriteRecord(SinkRecord record, CollectionSchema collectionSchema) {
         // not support dynamic schema for now, for dynamic schema, we need to put the data into a JSONObject
         List<InsertParam.Field> fields = converter.convertRecord(record, collectionSchema);
         InsertParam insertParam = InsertParam.newBuilder()

@@ -8,13 +8,11 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class DataConverterTest {
     CollectionSchema collectionSchema;
@@ -50,9 +48,28 @@ public class DataConverterTest {
         value.put("description_vector", generateVector(8));
         value.put("price", 0F);
         SinkRecord sr = new SinkRecord("test", 0, null, null, null, value, 0);
+        List<InsertParam.Field> expected_fields = new ArrayList<>();
+        value.forEach((key1, value1) -> {
+            expected_fields.add(new InsertParam.Field(key1, Collections.singletonList(value1)));
+        });
 
         List<InsertParam.Field> fields = dataConverter.convertRecord(sr, collectionSchema);
-        System.out.println(fields);
+
+        // assert if expected_fields have the same size and same elements with fields
+        Assert.assertEquals(expected_fields.size(), fields.size());
+
+        for (InsertParam.Field expectedField : expected_fields) {
+            boolean found = false;
+            for (InsertParam.Field field : fields) {
+                if (expectedField.getName().equals(field.getName()) &&
+                        expectedField.getValues().equals(field.getValues())) {
+                    found = true;
+                    break;
+                }
+            }
+            Assert.assertTrue(found);
+        }
+
     }
 
     @Test
@@ -72,10 +89,15 @@ public class DataConverterTest {
         value.put("description_vector", generateVector(8));
         value.put("price", 17694F);
 
+
         SinkRecord sr = new SinkRecord("test", 0, null, null, schema, value, 0);
 
         List<InsertParam.Field> fields = dataConverter.convertRecord(sr, collectionSchema);
-        System.out.println(fields);
+
+        Assert.assertEquals(5, fields.size());
+        fields.forEach(field -> {
+            Assert.assertEquals(value.get(field.getName()), field.getValues().get(0));
+        });
     }
 
     public List<Float> generateVector(Integer dimensions){
