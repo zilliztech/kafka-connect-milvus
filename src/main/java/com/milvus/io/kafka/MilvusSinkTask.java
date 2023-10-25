@@ -1,5 +1,6 @@
 package com.milvus.io.kafka;
 
+import com.milvus.io.kafka.helper.MilvusClientHelper;
 import com.milvus.io.kafka.utils.DataConverter;
 import com.milvus.io.kafka.utils.Utils;
 import com.milvus.io.kafka.utils.VersionUtil;
@@ -8,7 +9,6 @@ import io.milvus.grpc.CollectionSchema;
 import io.milvus.grpc.DescribeCollectionResponse;
 import io.milvus.grpc.GetLoadStateResponse;
 import io.milvus.grpc.LoadState;
-import io.milvus.param.ConnectParam;
 import io.milvus.param.R;
 import io.milvus.param.collection.DescribeCollectionParam;
 import io.milvus.param.collection.GetLoadStateParam;
@@ -39,17 +39,16 @@ public class MilvusSinkTask extends SinkTask {
 
     @Override
     public void start(Map<String, String> props) {
+        start(props, null);
+    }
+
+    // make visible for test
+    protected void start(Map<String, String> props, MilvusServiceClient milvusClient) {
         log.info("Starting MilvusSinkTask.");
         props.put(TOKEN, Utils.encryptToken(props.get(TOKEN)));
         this.config = new MilvusSinkConnectorConfig(props);
         this.converter = new DataConverter(config);
-
-        // connect to milvus with username and password
-        this.myMilvusClient = new MilvusServiceClient(
-                ConnectParam.newBuilder()
-                        .withUri(config.getUrl())
-                        .withToken(Utils.decryptToken(config.getToken().value()))
-                        .build());
+        this.myMilvusClient = milvusClient == null ? new MilvusClientHelper().createMilvusClient(config) : milvusClient;
         this.collectionSchema = GetCollectionInfo(config.getCollectionName());
 
         log.info("Started MilvusSinkTask, Connecting to Zilliz Cluster:" + config.getUrl());
