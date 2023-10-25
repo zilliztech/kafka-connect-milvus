@@ -85,8 +85,8 @@ if your topic has an output format other than plain json, you need to choose the
 
 
 - Sample Config for kafka topic with schema, check [here](https://docs.confluent.io/platform/current/schema-registry/connect.html) for more details
-
-    <img src="src/main/resources/images/with_schema.png" width="80%" />
+  
+<img src="src/main/resources/images/with_schema.png" width="80%" />
   
 ## Step 5: Launch the connector
 
@@ -103,7 +103,7 @@ Start the connector to begin streaming data from Kafka to Milvus.
 ```
 - Topic Page on Confluent Cloud
 
-    <img src="src/main/resources/images/produce_message.png" width="80%" />
+<img src="src/main/resources/images/produce_message.png" width="80%" />
 
 2. Check if the entity has been inserted into the collection in Zilliz Cloud. Here is what it looks like on Zilliz Cloud if the insertion succeeds:
 
