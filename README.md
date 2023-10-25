@@ -18,7 +18,7 @@ Use this quick start to get up and running with the kafka-connect-milvus connect
 
 Complete the following steps to download the kafka-connect-milvus plugin.
 
-1. download the plugin zip file `zilliz-kafka-connect-milvus-v0.1.0-alpha.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases/tag/v0.1.0).
+1. download the latest plugin zip file `zilliz-kafka-connect-milvus-xxx.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases/tag/v0.1.0).
 
 ## Step 2: Configure Confluent Cloud and Zilliz Cloud
 
@@ -35,31 +35,58 @@ Note: Make sure they have the same number of fields, where one and only one is a
 2. Click on `Add Plugin`.
 3. Upload the `zilliz-kafka-connect-milvus-xxx.zip` file you downloaded in Step 1.
 
-<img src="src/main/resources/images/add_plugin.png" width="50%" />
+<img src="src/main/resources/images/add_plugin.png" width="80%" />
 
-4. put `com.milvus.io.kafka.MilvusSinkConnector` into Connector class.
+- Put Connector plugin details
+- Put `com.milvus.io.kafka.MilvusSinkConnector` into Connector class.
+- For Sensitive properties, fill in the config field you want to be hidden, like `token`, check [custom-connector](https://docs.confluent.io/cloud/current/connectors/bring-your-connector/custom-connector-qs.html) for more details.
+
 
 ## Step 4: Configure the kafka-connect-milvus Connector
 
 1. Go to the Connectors section in your Confluent Cloud cluster.
 2. Click on `Get Started`.
+3. Enter Confluent Cloud API Key and Secret
+4. Add Configuration for the connector
 
-Provide the following credentials by `Add Sensitive Property`:
+    Provide the milvus connector config as follows:
 
-```json
-  "public.endpoint": "https://<public.endpoint>:port",
-  "token": "*****************************************",
-  "collection.name": "topic_0",
-  "topics": "topic_0"
-```
+    ```json
+   {
+      "public.endpoint": "https://<public.endpoint>:port",
+      "token": "*****************************************",
+      "collection.name": "topic_0",
+      "topics": "topic_0"
+   }
+    ```
 
-Note: the token field is either the API token or `<username>:<password>`, depending on the instance type of your collection in Milvus or Zilliz Cloud.
+   - The token field is either the API token or `<username>:<password>`, depending on the instance type of your collection in Milvus or Zilliz Cloud.
+5. Enter Connection endpoints, which is the public endpoint of your Milvus or Zilliz Cloud instance. Like: `in01-034b8444ab99cab.aws-us-west-2.vectordb.zillizcloud.com`
+6. Choose sizing, the number of tasks to be run
+7. Review and launch
+
+#### Sample Config
+
+<img src="src/main/resources/images/add_config.png" width="90%" />
+
+
+
+#### Kafka Topic Converter
+We support Json, JsonSchema, Avro, ProtoBuf format for Kafka topic,
+if your topic has an output format other than plain json, you need to choose the converter type in `Auto Configure Schema Registry`.
+
+<img src="src/main/resources/images/scheme_registry.png" width="50%" />
+
+
+- Sample Config for kafka topic with schema, check [here](https://docs.confluent.io/platform/current/schema-registry/connect.html) for more details
+
+    <img src="src/main/resources/images/with_schema.png" width="80%" />
   
 ## Step 5: Launch the connector
 
 Start the connector to begin streaming data from Kafka to Milvus.
 
-* First, produce a message to the Kafka topic you just created in Confluent Cloud
+1. Try produce a message to the Kafka topic you just created in Confluent Cloud
 ```json
 {
   "id": 0,
@@ -68,11 +95,14 @@ Start the connector to begin streaming data from Kafka to Milvus.
   "link": "https://medium.com/swlh/the-reported-mortality-rate-of-coronavirus-is-not-important-369989c8d912"
 }
 ```
+- Topic Page on Confluent Cloud
 
-* Then check if the data record has been  inserted into the collection in Zilliz Cloud. Here is what it looks like on Zilliz Cloud if the insertion was successful:
+    <img src="src/main/resources/images/produce_message.png" width="80%" />
+
+2. Check if the data record has been  inserted into the collection in Zilliz Cloud. Here is what it looks like on Zilliz Cloud if the insertion was successful:
 
 <img src="src/main/resources/images/insearted_entities.png" width="80%" />
- 
+
 
 ### Support
 
