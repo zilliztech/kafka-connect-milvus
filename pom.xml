@@ -129,9 +129,8 @@
                             <title>Milvus Sink Connector</title>
                             <documentationUrl>https://github.com/zilliztech/kafka-connect-milvus/tree/main</documentationUrl>
                             <description>
-                                This is a Kafka sink connector for Milvus. It allows you to stream vector data from Kafka to Milvus.
-
-                                This current version supports connection from Confluent Cloud (hosted Kafka) to Milvus (self-hosted or Zilliz Cloud).
+                                This is a Kafka sink connector for Milvus. It allows you to stream vector data from Kafka to Milvus. This
+                                current version supports connection from Confluent Cloud (hosted Kafka) to Milvus (self-hosted or Zilliz Cloud).
 
                                 Zilliz Cloud and Milvus are vector databases where you can ingest, store and search vector data.
                                 A data record in Zilliz Cloud or Milvus contains one vector field and multiple scalar fields such
