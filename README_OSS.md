@@ -64,10 +64,11 @@ Note: Make sure the schema on both sides match each other. In the schema, there 
     topics=topic_0
     ``` 
 ## Step 6: Launch the connector
+1. Start the connector with the previous configuration file
 ```shell
-bin/connect-standalone.sh config/connect-standalone.properties config/milvus-sink-connector.properties
+$ bin/connect-standalone.sh config/connect-standalone.properties config/milvus-sink-connector.properties
 ```
-1. Try produce a message to the Kafka topic you just created in Kafka
+2. Try produce a message to the Kafka topic you just created in Kafka
 ```shell
 bin/kafka-console-producer.sh --topic topic_0 --bootstrap-server localhost:9092                        
 >{"id": 0, "title": "The Reported Mortality Rate of Coronavirus Is Not Important", "title_vector": [0.041732933, 0.013779674, -0.027564144, -0.013061441, 0.009748648, 0.00082446384, -0.00071647146, 0.048612226], "link": "https://medium.com/swlh/the-reported-mortality-rate-of-coronavirus-is-not-important-369989c8d912"}
