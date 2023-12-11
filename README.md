@@ -17,6 +17,8 @@ The name of each field must be exactly the same on both sides.
 In this quick start guide we show how to setup Confluent Cloud and Zilliz Cloud to ingest vector data.
 For self-hosted Milvus the setup is similar.
 
+- If you want to use this connector with open source Kafka, see [README_OSS.md](README_OSS.md)
+
 ## Step 1: Download the kafka-connect-milvus plugin
 
 Complete the following steps to download the kafka-connect-milvus plugin.
