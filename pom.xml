@@ -129,25 +129,21 @@
                             <title>Milvus Sink Connector</title>
                             <documentationUrl>https://github.com/zilliztech/kafka-connect-milvus/tree/main</documentationUrl>
                             <description>
-                                This is a Kafka sink connector for Milvus. It allows you to stream vector data from Kafka to Milvus. This
-                                current version supports connection from Confluent Cloud (hosted Kafka) to Milvus (self-hosted or Zilliz Cloud).
+                                This is a Kafka sink connector for Milvus. It allows you to stream vector data from Kafka to Milvus. This current version supports connection from Confluent Cloud (hosted Kafka) and Open-Source Kafka to Milvus (self-hosted or Zilliz Cloud).
 
-                                Zilliz Cloud and Milvus are vector databases where you can ingest, store and search vector data.
-                                A data record in Zilliz Cloud or Milvus contains one vector field and multiple scalar fields such
-                                as string, integer and float. To stream data, the Kafka message schema must match the schema of the Milvus collection,
-                                containing one and only one vector field, and zero to many scalar fields. Each field name must be exactly the same on both sides.
+                                Zilliz Cloud and Milvus are vector databases where you can ingest, store and search vector data. A data record in Zilliz Cloud or Milvus contains one vector field and multiple scalar fields such as string, integer, and float. To stream data, the Kafka message schema must match the schema of the Milvus collection, containing one and only one vector field, and zero to many scalar fields. Each field name must be exactly the same on both sides.
                             </description>
                             <ownerUsername>zilliz</ownerUsername>
                             <ownerType>organization</ownerType>
                             <ownerName>Zilliz, Inc.</ownerName>
                             <ownerUrl>https://zilliz.com/</ownerUrl>
-                            <ownerLogo>src/main/resources/images/zilliz.png</ownerLogo>
+                            <ownerLogo>assets/zilliz_logo.png</ownerLogo>
                             <supportProviderName>Zilliz, Inc.</supportProviderName>
                             <supportSummary>
                                 If you require any assistance or have questions regarding the Kafka Connect Milvus Connector, please feel free to reach out to our support team: support@zilliz.com
                             </supportSummary>
                             <supportUrl>https://zilliz.com</supportUrl>
-                            <supportLogo>src/main/resources/images/zilliz.png</supportLogo>
+                            <supportLogo>assets/zilliz_logo.png</supportLogo>
 
                             <componentTypes>
                                 <componentType>sink</componentType>
