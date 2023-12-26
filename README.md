@@ -23,7 +23,7 @@ For self-hosted Milvus the setup is similar.
 
 Complete the following steps to download the kafka-connect-milvus plugin.
 
-1. download the latest plugin zip file `zilliz-kafka-connect-milvus-xxx.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases/tag/v0.1.0).
+1. download the latest plugin zip file `zilliz-kafka-connect-milvus-xxx.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases).
 
 ## Step 2: Configure Confluent Cloud and Zilliz Cloud
 
