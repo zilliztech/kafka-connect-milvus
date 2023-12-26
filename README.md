@@ -3,7 +3,7 @@
 This is a Kafka sink connector for Milvus. It allows you to stream vector data from Kafka to Milvus.
 
 This current version supports connection from
-[Confluent Cloud](https://www.confluent.io/confluent-cloud/) (hosted Kafka) to Milvus (self-hosted or 
+[Confluent Cloud](https://www.confluent.io/confluent-cloud/) (hosted Kafka) and Open-Source Kafka to Milvus (self-hosted or 
 [Zilliz Cloud](https://zilliz.com/cloud)).
 
 Zilliz Cloud and Milvus are vector databases where you can ingest, store and search vector data.
