@@ -10,7 +10,7 @@
   <url>https://github.com/zilliztech/kafka-connect-milvus</url>
 
     <properties>
-        <project-version>0.1.0</project-version>
+        <project-version>0.1.1</project-version>
         <confluent.maven.repo>https://packages.confluent.io/maven/</confluent.maven.repo>
     </properties>
 
