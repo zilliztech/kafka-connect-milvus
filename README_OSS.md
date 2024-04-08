@@ -5,7 +5,7 @@ Cloud to ingest vector data.
 
 Complete the following steps to download the kafka-connect-milvus plugin.
 
-1. download the latest plugin zip file `zilliz-kafka-connect-milvus-xxx.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases/tag/v0.1.0).
+1. download the latest plugin zip file `zilliz-kafka-connect-milvus-xxx.zip` from [here](https://github.com/zilliztech/kafka-connect-milvus/releases).
 
 ## Step 2: Download Kafka 
 1. Download the latest kafka from [here](https://kafka.apache.org/downloads).
