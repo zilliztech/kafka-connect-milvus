@@ -10,7 +10,7 @@
   <url>https://github.com/zilliztech/kafka-connect-milvus</url>
 
     <properties>
-        <project-version>0.1.1</project-version>
+        <project-version>0.1.2</project-version>
         <confluent.maven.repo>https://packages.confluent.io/maven/</confluent.maven.repo>
     </properties>
 
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-http2</artifactId>
-            <version>4.1.100.Final</version>
+            <version>4.1.108.Final</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
