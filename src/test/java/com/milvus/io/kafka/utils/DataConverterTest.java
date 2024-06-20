@@ -1,9 +1,12 @@
 package com.milvus.io.kafka.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import io.milvus.grpc.CollectionSchema;
 import io.milvus.grpc.DataType;
 import io.milvus.grpc.FieldSchema;
 import io.milvus.param.dml.InsertParam;
+import io.milvus.v2.service.collection.request.AddFieldReq;
+import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -15,7 +18,7 @@ import org.junit.Test;
 import java.util.*;
 
 public class DataConverterTest {
-    CollectionSchema collectionSchema;
+    CreateCollectionReq.CollectionSchema collectionSchema;
 
     DataConverter dataConverter;
 
@@ -29,14 +32,14 @@ public class DataConverterTest {
         //                .field("description", Schema.STRING_SCHEMA)
         //                .field("description_vector", Schema.ARRAY(Schema.FLOAT32_SCHEMA)
         //                .field("price", Schema.FLOAT32_SCHEMA)
-
-        this.collectionSchema = CollectionSchema.newBuilder()
-                .addFields(FieldSchema.newBuilder().setName("id").setDataType(DataType.Int64).build())
-                .addFields(FieldSchema.newBuilder().setName("name").setDataType(DataType.VarChar).build())
-                .addFields(FieldSchema.newBuilder().setName("description").setDataType(DataType.VarChar).build())
-                .addFields(FieldSchema.newBuilder().setName("description_vector").setDataType(DataType.FloatVector).build())
-                .addFields(FieldSchema.newBuilder().setName("price").setDataType(DataType.Float).build())
+        this.collectionSchema = CreateCollectionReq.CollectionSchema.builder()
                 .build();
+        collectionSchema.addField(AddFieldReq.builder().fieldName("id").dataType(io.milvus.v2.common.DataType.Int64).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("name").dataType(io.milvus.v2.common.DataType.VarChar).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("description").dataType(io.milvus.v2.common.DataType.VarChar).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("description_vector").dataType(io.milvus.v2.common.DataType.FloatVector).dimension(2).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("price").dataType(io.milvus.v2.common.DataType.Float).build());
+
     }
 
     @Test
@@ -48,28 +51,14 @@ public class DataConverterTest {
         value.put("description_vector", generateVector(8));
         value.put("price", 0F);
         SinkRecord sr = new SinkRecord("test", 0, null, null, null, value, 0);
-        List<InsertParam.Field> expected_fields = new ArrayList<>();
-        value.forEach((key1, value1) -> {
-            expected_fields.add(new InsertParam.Field(key1, Collections.singletonList(value1)));
-        });
 
-        List<InsertParam.Field> fields = dataConverter.convertRecord(sr, collectionSchema);
+        JSONObject expected_field = new JSONObject();
+        expected_field.putAll(value);
+
+        JSONObject fields = dataConverter.convertRecord(sr, collectionSchema);
 
         // assert if expected_fields have the same size and same elements with fields
-        Assert.assertEquals(expected_fields.size(), fields.size());
-
-        for (InsertParam.Field expectedField : expected_fields) {
-            boolean found = false;
-            for (InsertParam.Field field : fields) {
-                if (expectedField.getName().equals(field.getName()) &&
-                        expectedField.getValues().equals(field.getValues())) {
-                    found = true;
-                    break;
-                }
-            }
-            Assert.assertTrue(found);
-        }
-
+        Assert.assertEquals(expected_field, fields);
     }
 
     @Test
@@ -92,11 +81,27 @@ public class DataConverterTest {
 
         SinkRecord sr = new SinkRecord("test", 0, null, null, schema, value, 0);
 
-        List<InsertParam.Field> fields = dataConverter.convertRecord(sr, collectionSchema);
+        JSONObject fields = dataConverter.convertRecord(sr, collectionSchema);
 
         Assert.assertEquals(5, fields.size());
-        fields.forEach(field -> {
-            Assert.assertEquals(value.get(field.getName()), field.getValues().get(0));
+        fields.forEach((k, v) -> {
+            switch (k) {
+                case "id":
+                    Assert.assertEquals(17694L, v);
+                    break;
+                case "name":
+                    Assert.assertEquals("17694", v);
+                    break;
+                case "description":
+                    Assert.assertEquals("17694", v);
+                    break;
+                case "description_vector":
+                    Assert.assertEquals(8, ((List<Float>) v).size());
+                    break;
+                case "price":
+                    Assert.assertEquals(17694F, v);
+                    break;
+            }
         });
     }
 

@@ -10,7 +10,7 @@
   <url>https://github.com/zilliztech/kafka-connect-milvus</url>
 
     <properties>
-        <project-version>0.1.2</project-version>
+        <project-version>0.1.3</project-version>
         <confluent.maven.repo>https://packages.confluent.io/maven/</confluent.maven.repo>
     </properties>
 
@@ -49,27 +49,11 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-<!--        grpc dependence-->
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.46.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-grpclb</artifactId>
-            <version>1.59.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>1.59.0</version>
-        </dependency>
 <!--    update dependence to resolve CVE issues -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-json</artifactId>
-            <version>3.6.0</version>
+            <version>3.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
