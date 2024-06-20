@@ -1,12 +1,16 @@
 package com.milvus.io.kafka;
 
-import com.milvus.io.kafka.helper.MilvusClientHelper;
-import io.milvus.client.MilvusServiceClient;
-import io.milvus.grpc.*;
-import io.milvus.param.R;
-import io.milvus.param.collection.DescribeCollectionParam;
-import io.milvus.param.collection.GetLoadStateParam;
-import io.milvus.param.dml.InsertParam;
+import io.milvus.grpc.FieldSchema;
+import io.milvus.grpc.GetLoadStateResponse;
+import io.milvus.grpc.LoadState;
+import io.milvus.v2.client.MilvusClientV2;
+import io.milvus.v2.common.DataType;
+import io.milvus.v2.service.collection.request.AddFieldReq;
+import io.milvus.v2.service.collection.request.CreateCollectionReq;
+import io.milvus.v2.service.collection.request.DescribeCollectionReq;
+import io.milvus.v2.service.collection.request.GetLoadStateReq;
+import io.milvus.v2.service.collection.response.DescribeCollectionResp;
+import io.milvus.v2.service.vector.request.InsertReq;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +29,7 @@ public class MilvusSinkTaskTest {
     @InjectMocks
     private MilvusSinkTask task;
     @Mock
-    private MilvusServiceClient milvusClient;
+    private MilvusClientV2 milvusClient;
 
     private Map<String, String> props;
 
@@ -39,26 +43,21 @@ public class MilvusSinkTaskTest {
         props.put(COLLECTION_NAME, "collection_test");
         // Add other required properties
 
-        CollectionSchema collectionSchema = CollectionSchema.newBuilder()
-                .addFields(FieldSchema.newBuilder().setName("id").setDataType(DataType.Int64).build())
-                .addFields(FieldSchema.newBuilder().setName("name").setDataType(DataType.VarChar).build())
-                .addFields(FieldSchema.newBuilder().setName("description").setDataType(DataType.VarChar).build())
-                .addFields(FieldSchema.newBuilder().setName("description_vector").setDataType(DataType.FloatVector).build())
-                .addFields(FieldSchema.newBuilder().setName("price").setDataType(DataType.Float).build())
+        CreateCollectionReq.CollectionSchema collectionSchema = CreateCollectionReq.CollectionSchema.builder()
                 .build();
+        collectionSchema.addField(AddFieldReq.builder().fieldName("id").dataType(DataType.Int64).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("name").dataType(DataType.VarChar).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("description").dataType(DataType.VarChar).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("description_vector").dataType(DataType.FloatVector).dimension(2).build());
+        collectionSchema.addField(AddFieldReq.builder().fieldName("price").dataType(DataType.Float).build());
 
-        DescribeCollectionResponse mockDescribeResponse = DescribeCollectionResponse.newBuilder()
-                .setSchema(collectionSchema)
+        DescribeCollectionResp mockDescribeR = DescribeCollectionResp.builder()
+                .collectionSchema(collectionSchema)
+                .autoID(true)
                 .build();
-        R<DescribeCollectionResponse> mockDescribeR = R.success(mockDescribeResponse);
-
-        GetLoadStateResponse mockLoadStateResponse = GetLoadStateResponse.newBuilder()
-                .setState(LoadState.LoadStateLoaded)
-                .build();
-        R<GetLoadStateResponse> mockLoadStateR = R.success(mockLoadStateResponse);
-
-        when(milvusClient.describeCollection(any(DescribeCollectionParam.class))).thenReturn(mockDescribeR);
-        when(milvusClient.getLoadState(any(GetLoadStateParam.class))).thenReturn(mockLoadStateR);
+        when(milvusClient.hasCollection(any())).thenReturn(true);
+        when(milvusClient.describeCollection(any(DescribeCollectionReq.class))).thenReturn(mockDescribeR);
+        when(milvusClient.getLoadState(any(GetLoadStateReq.class))).thenReturn(true);
 
     }
 
@@ -80,9 +79,9 @@ public class MilvusSinkTaskTest {
         task.stop();
 
         // Verify that the client methods were called with the expected parameters
-        verify(milvusClient).describeCollection(any(DescribeCollectionParam.class));
-        verify(milvusClient).getLoadState(any(GetLoadStateParam.class));
-        verify(milvusClient).insert(any(InsertParam.class));
+        verify(milvusClient).describeCollection(any(DescribeCollectionReq.class));
+        verify(milvusClient).getLoadState(any(GetLoadStateReq.class));
+        verify(milvusClient).insert(any(InsertReq.class));
     }
 
     public List<Float> generateVector(Integer dimensions){

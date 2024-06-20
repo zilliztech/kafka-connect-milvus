@@ -52,7 +52,7 @@ Note: Make sure the schema on both sides match each other. In the schema, there 
     ```properties
     key.converter.schemas.enable=false
     value.converter.schemas.enable=false
-    plugin.path=libs/zilliz-kafka-connect-milvus-0.1.0
+    plugin.path=libs/zilliz-kafka-connect-milvus-xxx
     ```
 4. create and configure a `milvus-sink-connector.properties` file in the `config` directory of your Kafka installation.
     ```properties

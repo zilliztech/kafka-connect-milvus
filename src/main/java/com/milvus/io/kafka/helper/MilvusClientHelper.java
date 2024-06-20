@@ -4,13 +4,15 @@ import com.milvus.io.kafka.MilvusSinkConnectorConfig;
 import com.milvus.io.kafka.utils.Utils;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
+import io.milvus.v2.client.ConnectConfig;
+import io.milvus.v2.client.MilvusClientV2;
 
 public class MilvusClientHelper {
-    public MilvusServiceClient createMilvusClient(MilvusSinkConnectorConfig config) {
-        ConnectParam connectParam = ConnectParam.newBuilder()
-                .withUri(config.getUrl())
-                .withToken(Utils.decryptToken(config.getToken().value()))
+    public MilvusClientV2 createMilvusClient(MilvusSinkConnectorConfig config) {
+        ConnectConfig connectConfig = ConnectConfig.builder()
+                .uri(config.getUrl())
+                .token(Utils.decryptToken(config.getToken().value()))
                 .build();
-        return new MilvusServiceClient(connectParam);
+        return new MilvusClientV2(connectConfig);
     }
 }

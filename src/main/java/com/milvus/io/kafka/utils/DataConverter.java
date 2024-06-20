@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.milvus.io.kafka.MilvusSinkConnectorConfig;
-import io.milvus.grpc.CollectionSchema;
-import io.milvus.grpc.DataType;
-import io.milvus.grpc.FieldSchema;
 import io.milvus.param.dml.InsertParam;
+import io.milvus.v2.common.DataType;
+import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
@@ -27,9 +26,9 @@ public class DataConverter {
         this.config = config;
     }
     /*
-        * Convert SinkRecord to List<InsertParam.Field>
+        * Convert SinkRecord to JSONObject
      */
-    public List<InsertParam.Field> convertRecord(SinkRecord sr, CollectionSchema collectionSchema) {
+    public JSONObject convertRecord(SinkRecord sr, CreateCollectionReq.CollectionSchema collectionSchema) {
         // parse sinkRecord to get filed name and value
         if(sr.value() instanceof Struct) {
             return parseValue((Struct)sr.value(), collectionSchema);
@@ -40,35 +39,29 @@ public class DataConverter {
         }
     }
 
-    private List<InsertParam.Field> parseValue(HashMap<?, ?> mapValue, CollectionSchema collectionSchema) {
-        List<InsertParam.Field> fields = new ArrayList<>();
-        // convert collectionSchema.getFieldsList: Filed's Name and DataType to a Map
-        Map<String, DataType> fieldType = collectionSchema.getFieldsList().stream().collect(Collectors.toMap(FieldSchema::getName, FieldSchema::getDataType));
-        mapValue.forEach((key1, value) -> {
-            // for each field, create a InsertParam.Field
-            if(fieldType.containsKey(key1.toString())){
+    private JSONObject parseValue(HashMap<?, ?> mapValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+        JSONObject fields = new JSONObject();
+        mapValue.forEach((field, value) -> {
+            if(collectionSchema.getField(field.toString())!=null){
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                fields.add(new InsertParam.Field(key1.toString(), Collections.singletonList(castValueToType(value, fieldType.get(key1.toString())))));
-            }else if(collectionSchema.getEnableDynamicField()){
-                // if the key not exists in the collection and the collection is dynamic, store the value directly
-                fields.add(new InsertParam.Field(key1.toString(), Collections.singletonList(value)));
+                fields.put(field.toString(), castValueToType(value, collectionSchema.getField(field.toString()).getDataType()));
+            }else {
+                log.warn("Field {} not exists in collection", field);
             }
+
         });
         return fields;
     }
 
-    private List<InsertParam.Field> parseValue(Struct structValue, CollectionSchema collectionSchema) {
-        List<InsertParam.Field> fields = new ArrayList<>();
-        // convert collectionSchema.getFieldsList: Filed's Name and DataType to a Map
-        Map<String, DataType> fieldType = collectionSchema.getFieldsList().stream().collect(Collectors.toMap(FieldSchema::getName, FieldSchema::getDataType));
+    private JSONObject parseValue(Struct structValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+        JSONObject fields = new JSONObject();
+
         structValue.schema().fields().forEach(field -> {
-            // for each field, create a InsertParam.Field
-            if(fieldType.containsKey(field.name())){
+            if(collectionSchema.getField(field.name()) != null){
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                fields.add(new InsertParam.Field(field.name(), Collections.singletonList(castValueToType(structValue.get(field.name()), fieldType.get(field.name())))));
-            }else if(collectionSchema.getEnableDynamicField()){
-                // if the key not exists in the collection and the collection is dynamic, store the value directly
-                fields.add(new InsertParam.Field(field.name(), Collections.singletonList(structValue.get(field.name()))));
+                fields.put(field.toString(), castValueToType(structValue.get(field.name()), collectionSchema.getField(field.name()).getDataType()));
+            }else {
+                log.warn("Field {} not exists in collection", field);
             }
         });
 
@@ -140,19 +133,5 @@ public class DataConverter {
         }catch (Exception e){
             throw new RuntimeException("parse binary vector field error: " + e.getMessage() + vectors);
         }
-    }
-
-    public List<JSONObject> convertRecordWithDynamicSchema(SinkRecord sr, CollectionSchema collectionSchema) {
-        List<InsertParam.Field> fields = convertRecord(sr, collectionSchema);
-        List<JSONObject> jsonObjects = new ArrayList<>();
-        int rows = fields.get(0).getValues().size();
-        for (int i = 0; i < rows; i++) {
-            JSONObject jsonObject = new JSONObject();
-            for (InsertParam.Field field : fields) {
-                jsonObject.put(field.getName(), field.getValues().get(i));
-            }
-            jsonObjects.add(jsonObject);
-        }
-        return jsonObjects;
     }
 }

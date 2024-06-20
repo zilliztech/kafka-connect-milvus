@@ -2,6 +2,7 @@ package com.milvus.io.kafka.helper;
 
 import com.milvus.io.kafka.MilvusSinkConnectorConfig;
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.v2.client.MilvusClientV2;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -18,7 +19,7 @@ public class MilvusClientHelperTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(milvusClientHelper.createMilvusClient(any(MilvusSinkConnectorConfig.class))).thenReturn(mock(MilvusServiceClient.class));
+        when(milvusClientHelper.createMilvusClient(any(MilvusSinkConnectorConfig.class))).thenReturn(mock(MilvusClientV2.class));
     }
 
     @Test
