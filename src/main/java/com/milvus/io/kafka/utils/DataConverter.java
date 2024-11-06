@@ -1,10 +1,11 @@
 package com.milvus.io.kafka.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.milvus.io.kafka.MilvusSinkConnectorConfig;
-import io.milvus.param.dml.InsertParam;
+import io.milvus.common.utils.JsonUtils;
 import io.milvus.v2.common.DataType;
 import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import org.apache.kafka.connect.data.Struct;
@@ -13,54 +14,56 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
 
 public class DataConverter {
 
-    private final MilvusSinkConnectorConfig config;
-
     private static final Logger log = LoggerFactory.getLogger(DataConverter.class);
+    private final MilvusSinkConnectorConfig config;
 
     public DataConverter(MilvusSinkConnectorConfig config) {
         this.config = config;
     }
+
     /*
-        * Convert SinkRecord to JSONObject
+     * Convert SinkRecord to JsonObject
      */
-    public JSONObject convertRecord(SinkRecord sr, CreateCollectionReq.CollectionSchema collectionSchema) {
-        // parse sinkRecord to get filed name and value
-        if(sr.value() instanceof Struct) {
-            return parseValue((Struct)sr.value(), collectionSchema);
-        }else if (sr.value() instanceof HashMap) {
-            return parseValue((HashMap<?, ?>)sr.value(), collectionSchema);
-        }else {
-            throw new RuntimeException("Unsupported SinkRecord data type" + sr.value());
+    public JsonObject convertRecord(SinkRecord sr, CreateCollectionReq.CollectionSchema collectionSchema) {
+        // parse sinkRecord to get field name and value
+        if (sr.value() instanceof Struct) {
+            return parseValue((Struct) sr.value(), collectionSchema);
+        } else if (sr.value() instanceof HashMap) {
+            return parseValue((HashMap<?, ?>) sr.value(), collectionSchema);
+        } else {
+            throw new RuntimeException("Unsupported SinkRecord data type: " + sr.value());
         }
     }
 
-    private JSONObject parseValue(HashMap<?, ?> mapValue, CreateCollectionReq.CollectionSchema collectionSchema) {
-        JSONObject fields = new JSONObject();
+    private JsonObject parseValue(HashMap<?, ?> mapValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+        JsonObject fields = new JsonObject();
+        Gson gson = new Gson();
         mapValue.forEach((field, value) -> {
-            if(collectionSchema.getField(field.toString())!=null){
+            if (collectionSchema.getField(field.toString()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                fields.put(field.toString(), castValueToType(value, collectionSchema.getField(field.toString()).getDataType()));
-            }else {
+                Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getDataType());
+                fields.add(field.toString(), gson.toJsonTree(object));
+            } else {
                 log.warn("Field {} not exists in collection", field);
             }
-
         });
         return fields;
     }
 
-    private JSONObject parseValue(Struct structValue, CreateCollectionReq.CollectionSchema collectionSchema) {
-        JSONObject fields = new JSONObject();
-
+    private JsonObject parseValue(Struct structValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+        JsonObject fields = new JsonObject();
+        Gson gson = new Gson();
         structValue.schema().fields().forEach(field -> {
-            if(collectionSchema.getField(field.name()) != null){
+            if (collectionSchema.getField(field.name()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                fields.put(field.toString(), castValueToType(structValue.get(field.name()), collectionSchema.getField(field.name()).getDataType()));
-            }else {
+                Object object = convertValueByMilvusType(structValue.get(field.name()), collectionSchema.getField(field.name()).getDataType());
+                fields.add(field.name(), gson.toJsonTree(object));
+            } else {
                 log.warn("Field {} not exists in collection", field);
             }
         });
@@ -68,8 +71,9 @@ public class DataConverter {
         return fields;
     }
 
-    private Object castValueToType(Object value, DataType dataType) {
-        switch (dataType){
+    private Object convertValueByMilvusType(Object value, DataType dataType) {
+        Gson gson = new Gson();
+        switch (dataType) {
             case Bool:
                 return Boolean.parseBoolean(value.toString());
             case Int8:
@@ -87,23 +91,24 @@ public class DataConverter {
             case String:
                 return value.toString();
             case JSON:
-                Gson gson = new Gson();
                 return gson.toJson(value);
             case BinaryVector:
                 return parseBinaryVectorField(value.toString());
             case FloatVector:
                 return parseFloatVectorField(value.toString());
+            case SparseFloatVector:
+                return gson.toJsonTree(value).getAsJsonObject();
             default:
-                throw new RuntimeException("Unsupported data type" + dataType);
+                throw new RuntimeException("Unsupported data type: " + dataType);
         }
     }
 
-    protected  List<Float> parseFloatVectorField(String vectors){
+    protected List<Float> parseFloatVectorField(String vectors) {
         try {
             log.debug("parse float vectors: {}", vectors);
 
             String[] vectorArrays = vectors.replaceAll("\\[", "").replaceAll("\\]", "")
-                    .replaceAll(" ","").split(",");
+                    .replaceAll(" ", "").split(",");
 
             List<Float> floatList = Lists.newLinkedList();
             for (String vector : vectorArrays) {
@@ -111,12 +116,12 @@ public class DataConverter {
             }
 
             return floatList;
-        }catch (Exception e){
-            throw new RuntimeException("parse float vector field error: " + e.getMessage() + vectors);
+        } catch (Exception e) {
+            throw new RuntimeException("parse float vector field error: " + e.getMessage() + " " + vectors);
         }
-
     }
-    protected  ByteBuffer parseBinaryVectorField(String vectors){
+
+    protected ByteBuffer parseBinaryVectorField(String vectors) {
         try {
             log.debug("parse binary vectors: {}", vectors);
 
@@ -130,8 +135,8 @@ public class DataConverter {
             }
 
             return buffer;
-        }catch (Exception e){
-            throw new RuntimeException("parse binary vector field error: " + e.getMessage() + vectors);
+        } catch (Exception e) {
+            throw new RuntimeException("parse binary vector field error: " + e.getMessage() + " " + vectors);
         }
     }
 }

@@ -34,5 +34,7 @@ public class MilvusSinkConnectorConfig extends AbstractConfig {
         return getPassword(TOKEN);
     }
 
-    public String getCollectionName(){return getString(COLLECTION_NAME);}
+    public String getCollectionName() {
+        return getString(COLLECTION_NAME);
+    }
 }
