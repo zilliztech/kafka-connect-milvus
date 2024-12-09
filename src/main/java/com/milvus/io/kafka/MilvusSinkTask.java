@@ -1,12 +1,12 @@
 package com.milvus.io.kafka;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
+import static com.milvus.io.kafka.MilvusSinkConnectorConfig.TOKEN;
 import com.milvus.io.kafka.helper.MilvusClientHelper;
 import com.milvus.io.kafka.utils.DataConverter;
 import com.milvus.io.kafka.utils.Utils;
 import com.milvus.io.kafka.utils.VersionUtil;
 import io.milvus.v2.client.MilvusClientV2;
-import io.milvus.v2.service.collection.request.CreateCollectionReq;
 import io.milvus.v2.service.collection.request.DescribeCollectionReq;
 import io.milvus.v2.service.collection.request.GetLoadStateReq;
 import io.milvus.v2.service.collection.request.HasCollectionReq;
@@ -18,9 +18,10 @@ import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-import static com.milvus.io.kafka.MilvusSinkConnectorConfig.TOKEN;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class MilvusSinkTask extends SinkTask {
 
@@ -58,7 +59,7 @@ public class MilvusSinkTask extends SinkTask {
             throw new RuntimeException("Collection not exist" + config.getCollectionName());
         }
         // check if the collection is loaded
-        if (!myMilvusClient.getLoadState(GetLoadStateReq.builder().collectionName(config.getCollectionName()).build())){
+        if (!myMilvusClient.getLoadState(GetLoadStateReq.builder().collectionName(config.getCollectionName()).build())) {
             log.error("Collection not loaded");
             throw new RuntimeException("Collection not loaded" + config.getCollectionName());
         }
@@ -68,28 +69,28 @@ public class MilvusSinkTask extends SinkTask {
     @Override
     public void put(Collection<SinkRecord> records) {
         log.info("Putting {} records to Milvus.", records.size());
-        if(records.isEmpty()) {
+        if (records.isEmpty()) {
             log.info("No records to put.");
             return;
         }
 
         // not support dynamic schema for now, for dynamic schema, we need to put the data into a JSONObject
-        List<JSONObject> datas = new ArrayList<>();
+        List<JsonObject> datas = new ArrayList<>();
         for (SinkRecord record : records) {
             log.debug("Writing {} to Milvus.", record);
-            if(record.value() == null) {
+            if (record.value() == null) {
                 log.warn("Skipping record with null value.");
                 continue;
             }
             try {
-                JSONObject data = converter.convertRecord(record, response.getCollectionSchema());
+                JsonObject data = converter.convertRecord(record, response.getCollectionSchema());
                 datas.add(data);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("Failed to convert record to JSONObject, skip it", e);
             }
         }
 
-        if(!response.getAutoID()){
+        if (!response.getAutoID()) {
             // default to use upsert
             UpsertReq upsertReq = UpsertReq.builder()
                     .collectionName(config.getCollectionName())
@@ -97,7 +98,7 @@ public class MilvusSinkTask extends SinkTask {
                     .build();
             log.info("Upserting data to collection: {} with datas: {}", config.getCollectionName(), datas);
             myMilvusClient.upsert(upsertReq);
-        }else {
+        } else {
             InsertReq insertReq = InsertReq.builder()
                     .collectionName(config.getCollectionName())
                     .data(datas)

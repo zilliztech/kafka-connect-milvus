@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MilvusSinkConnector extends SinkConnector{
+public class MilvusSinkConnector extends SinkConnector {
 
     private static final Logger log = LoggerFactory.getLogger(MilvusSinkConnector.class);
     private Map<String, String> configProperties;
@@ -24,7 +24,7 @@ public class MilvusSinkConnector extends SinkConnector{
             configProperties = props;
             // validation
             new MilvusSinkConnectorConfig(props);
-        }catch (ConfigException e){
+        } catch (ConfigException e) {
             throw new ConfigException("Couldn't start MilvusSinkConnector due to configuration error", e);
         }
     }
