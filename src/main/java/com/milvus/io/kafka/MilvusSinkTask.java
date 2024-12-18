@@ -2,17 +2,14 @@ package com.milvus.io.kafka;
 
 import com.google.gson.JsonObject;
 import static com.milvus.io.kafka.MilvusSinkConnectorConfig.TOKEN;
+import com.milvus.io.kafka.client.MilvusRestClient;
+import com.milvus.io.kafka.client.request.UpsertReq;
+import com.milvus.io.kafka.client.response.DescribeCollectionResp;
+import com.milvus.io.kafka.client.response.GetLoadStateResp;
 import com.milvus.io.kafka.helper.MilvusClientHelper;
 import com.milvus.io.kafka.utils.DataConverter;
 import com.milvus.io.kafka.utils.Utils;
 import com.milvus.io.kafka.utils.VersionUtil;
-import io.milvus.v2.client.MilvusClientV2;
-import io.milvus.v2.service.collection.request.DescribeCollectionReq;
-import io.milvus.v2.service.collection.request.GetLoadStateReq;
-import io.milvus.v2.service.collection.request.HasCollectionReq;
-import io.milvus.v2.service.collection.response.DescribeCollectionResp;
-import io.milvus.v2.service.vector.request.InsertReq;
-import io.milvus.v2.service.vector.request.UpsertReq;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -22,12 +19,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MilvusSinkTask extends SinkTask {
 
     private static final Logger log = LoggerFactory.getLogger(MilvusSinkTask.class);
     private MilvusSinkConnectorConfig config;
-    private MilvusClientV2 myMilvusClient;
+    private MilvusRestClient myMilvusClient;
     private DataConverter converter;
     private DescribeCollectionResp response;
 
@@ -42,7 +40,7 @@ public class MilvusSinkTask extends SinkTask {
     }
 
     // make visible for test
-    protected void start(Map<String, String> props, MilvusClientV2 milvusClient) {
+    protected void start(Map<String, String> props, MilvusRestClient milvusClient) {
         log.info("Starting MilvusSinkTask.");
         props.put(TOKEN, Utils.encryptToken(props.get(TOKEN)));
         this.config = new MilvusSinkConnectorConfig(props);
@@ -54,16 +52,17 @@ public class MilvusSinkTask extends SinkTask {
 
     private void preValidate() {
         // check if the collection exists
-        if (!myMilvusClient.hasCollection(HasCollectionReq.builder().collectionName(config.getCollectionName()).build())) {
+        if (!myMilvusClient.hasCollection(config.getCollectionName())) {
             log.error("Collection not exist");
             throw new RuntimeException("Collection not exist" + config.getCollectionName());
         }
         // check if the collection is loaded
-        if (!myMilvusClient.getLoadState(GetLoadStateReq.builder().collectionName(config.getCollectionName()).build())) {
+        GetLoadStateResp getLoadStateResp = myMilvusClient.getLoadState(config.getCollectionName());
+        if (!Objects.equals(getLoadStateResp.getLoadState(), "LoadStateLoaded")) {
             log.error("Collection not loaded");
             throw new RuntimeException("Collection not loaded" + config.getCollectionName());
         }
-        this.response = myMilvusClient.describeCollection(DescribeCollectionReq.builder().collectionName(config.getCollectionName()).build());
+        this.response = myMilvusClient.describeCollection(config.getCollectionName());
     }
 
     @Override
@@ -83,7 +82,7 @@ public class MilvusSinkTask extends SinkTask {
                 continue;
             }
             try {
-                JsonObject data = converter.convertRecord(record, response.getCollectionSchema());
+                JsonObject data = converter.convertRecord(record, response);
                 datas.add(data);
             } catch (Exception e) {
                 log.error("Failed to convert record to JSONObject, skip it", e);
@@ -98,13 +97,6 @@ public class MilvusSinkTask extends SinkTask {
                     .build();
             log.info("Upserting data to collection: {} with datas: {}", config.getCollectionName(), datas);
             myMilvusClient.upsert(upsertReq);
-        } else {
-            InsertReq insertReq = InsertReq.builder()
-                    .collectionName(config.getCollectionName())
-                    .data(datas)
-                    .build();
-            log.info("Inserting data to collection: {} with fields: {}", config.getCollectionName(), datas.get(0).keySet());
-            myMilvusClient.insert(insertReq);
         }
 
     }
@@ -112,10 +104,5 @@ public class MilvusSinkTask extends SinkTask {
     @Override
     public void stop() {
         log.info("Stopping Milvus client.");
-        try {
-            myMilvusClient.close(3);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
