@@ -21,6 +21,15 @@
             <url>${confluent.maven.repo}</url>
         </repository>
     </repositories>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>4.28.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
       <dependency>
@@ -50,6 +59,11 @@
             <scope>test</scope>
         </dependency>
 <!--    update dependence to resolve CVE issues -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>4.28.2</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-json</artifactId>
@@ -170,7 +184,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>8.4.2</version>
+                <version>11.1.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -180,6 +194,7 @@
                 </executions>
                 <configuration>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <nvdApiKey>05865c08-9d5c-4ba0-82b8-f3d8030f3683</nvdApiKey>
                 </configuration>
             </plugin>
         </plugins>
