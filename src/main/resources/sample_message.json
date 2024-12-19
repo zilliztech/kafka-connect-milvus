@@ -1,6 +1,15 @@
 {
   "id": 0,
   "title": "The Reported Mortality Rate of Coronavirus Is Not Important",
-  "title_vector": [0.041732933, 0.013779674, -0.027564144, -0.013061441, 0.009748648, 0.00082446384, -0.00071647146, 0.048612226],
+  "title_vector": [
+    0.041732933,
+    0.013779674,
+    -0.027564144,
+    -0.013061441,
+    0.009748648,
+    0.00082446384,
+    -0.00071647146,
+    0.048612226
+  ],
   "link": "https://medium.com/swlh/the-reported-mortality-rate-of-coronavirus-is-not-important-369989c8d912"
 }

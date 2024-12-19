@@ -1,19 +1,17 @@
 package com.milvus.io.kafka.utils;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.milvus.io.kafka.MilvusSinkConnectorConfig;
-import io.milvus.common.utils.JsonUtils;
-import io.milvus.v2.common.DataType;
-import io.milvus.v2.service.collection.request.CreateCollectionReq;
+import com.milvus.io.kafka.client.common.DataType;
+import com.milvus.io.kafka.client.response.DescribeCollectionResp;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,24 +27,24 @@ public class DataConverter {
     /*
      * Convert SinkRecord to JsonObject
      */
-    public JsonObject convertRecord(SinkRecord sr, CreateCollectionReq.CollectionSchema collectionSchema) {
+    public JsonObject convertRecord(SinkRecord sr, DescribeCollectionResp describeCollectionResp) {
         // parse sinkRecord to get field name and value
         if (sr.value() instanceof Struct) {
-            return parseValue((Struct) sr.value(), collectionSchema);
+            return parseValue((Struct) sr.value(), describeCollectionResp);
         } else if (sr.value() instanceof HashMap) {
-            return parseValue((HashMap<?, ?>) sr.value(), collectionSchema);
+            return parseValue((HashMap<?, ?>) sr.value(), describeCollectionResp);
         } else {
             throw new RuntimeException("Unsupported SinkRecord data type: " + sr.value());
         }
     }
 
-    private JsonObject parseValue(HashMap<?, ?> mapValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+    private JsonObject parseValue(HashMap<?, ?> mapValue, DescribeCollectionResp collectionSchema) {
         JsonObject fields = new JsonObject();
         Gson gson = new Gson();
         mapValue.forEach((field, value) -> {
             if (collectionSchema.getField(field.toString()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getDataType());
+                Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getType());
                 fields.add(field.toString(), gson.toJsonTree(object));
             } else {
                 log.warn("Field {} not exists in collection", field);
@@ -55,13 +53,13 @@ public class DataConverter {
         return fields;
     }
 
-    private JsonObject parseValue(Struct structValue, CreateCollectionReq.CollectionSchema collectionSchema) {
+    private JsonObject parseValue(Struct structValue, DescribeCollectionResp collectionSchema) {
         JsonObject fields = new JsonObject();
         Gson gson = new Gson();
         structValue.schema().fields().forEach(field -> {
             if (collectionSchema.getField(field.name()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                Object object = convertValueByMilvusType(structValue.get(field.name()), collectionSchema.getField(field.name()).getDataType());
+                Object object = convertValueByMilvusType(structValue.get(field.name()), collectionSchema.getField(field.name()).getType());
                 fields.add(field.name(), gson.toJsonTree(object));
             } else {
                 log.warn("Field {} not exists in collection", field);
@@ -71,9 +69,10 @@ public class DataConverter {
         return fields;
     }
 
-    private Object convertValueByMilvusType(Object value, DataType dataType) {
+    private Object convertValueByMilvusType(Object value, String dataType) {
+        DataType type = DataType.valueOf(dataType);
         Gson gson = new Gson();
-        switch (dataType) {
+        switch (type) {
             case Bool:
                 return Boolean.parseBoolean(value.toString());
             case Int8:
@@ -110,7 +109,7 @@ public class DataConverter {
             String[] vectorArrays = vectors.replaceAll("\\[", "").replaceAll("\\]", "")
                     .replaceAll(" ", "").split(",");
 
-            List<Float> floatList = Lists.newLinkedList();
+            List<Float> floatList = new ArrayList<>();
             for (String vector : vectorArrays) {
                 floatList.add(Float.valueOf(vector));
             }
