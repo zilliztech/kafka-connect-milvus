@@ -49,7 +49,7 @@ public class DataConverter {
                     Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getType());
                     fields.add(field.toString(), gson.toJsonTree(object));
                 } else {
-                    log.warn("Value is null for field {}, skip it.", field);
+                    log.trace("Value is null for field {}, skip it.", field);
                 }
             } else {
                 log.warn("Field {} not exists in collection", field);
@@ -69,7 +69,7 @@ public class DataConverter {
                     Object object = convertValueByMilvusType(value, collectionSchema.getField(field.name()).getType());
                     fields.add(field.name(), gson.toJsonTree(object));
                 } else {
-                    log.warn("Value is null for field {}, skip it.", field);
+                    log.trace("Value is null for field {}, skip it.", field);
                 }
             } else {
                 log.warn("Field {} not exists in collection", field);
