@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class DataConverter {
 
@@ -44,8 +45,12 @@ public class DataConverter {
         mapValue.forEach((field, value) -> {
             if (collectionSchema.getField(field.toString()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getType());
-                fields.add(field.toString(), gson.toJsonTree(object));
+                if (!Objects.isNull(value)) {
+                    Object object = convertValueByMilvusType(value, collectionSchema.getField(field.toString()).getType());
+                    fields.add(field.toString(), gson.toJsonTree(object));
+                } else {
+                    log.warn("Value is null for field {}, skip it.", field);
+                }
             } else {
                 log.warn("Field {} not exists in collection", field);
             }
@@ -59,8 +64,13 @@ public class DataConverter {
         structValue.schema().fields().forEach(field -> {
             if (collectionSchema.getField(field.name()) != null) {
                 // if the key exists in the collection, store the value by collectionSchema DataType
-                Object object = convertValueByMilvusType(structValue.get(field.name()), collectionSchema.getField(field.name()).getType());
-                fields.add(field.name(), gson.toJsonTree(object));
+                Object value = structValue.get(field.name());
+                if (!Objects.isNull(value)) {
+                    Object object = convertValueByMilvusType(value, collectionSchema.getField(field.name()).getType());
+                    fields.add(field.name(), gson.toJsonTree(object));
+                } else {
+                    log.warn("Value is null for field {}, skip it.", field);
+                }
             } else {
                 log.warn("Field {} not exists in collection", field);
             }
